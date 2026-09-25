@@ -12,14 +12,24 @@ st.set_page_config(page_title="Flight Delay Intelligence", page_icon="✈️", l
 BASE = Path(__file__).resolve().parent
 ART = BASE / "artifacts"
 
-def get_background_image():
-    image_path = BASE / "airport_background.jpg"
-    if not image_path.exists():
-        return ""
-    encoded = base64.b64encode(image_path.read_bytes()).decode("utf-8")
-    return f"data:image/jpeg;base64,{encoded}"
+def get_local_image(stem):
+    """Load a local image beside app.py as a base64 data URL."""
+    mime_by_suffix = {
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+    }
+    for suffix, mime in mime_by_suffix.items():
+        image_path = BASE / f"{stem}{suffix}"
+        if image_path.exists():
+            encoded = base64.b64encode(image_path.read_bytes()).decode("utf-8")
+            return f"data:{mime};base64,{encoded}"
+    return ""
 
-BACKGROUND_IMAGE = get_background_image()
+BACKGROUND_IMAGE = get_local_image("airport_background")
+EGYPTIAN_PLANE = get_local_image("egyptian_plane")
+AMERICAN_PLANE = get_local_image("american_plane")
 
 def find_file(name):
     p1 = ART / name
@@ -116,6 +126,51 @@ div[data-testid="stProgress"] > div > div > div > div{background-color:#D4AF37}
 .result-head small{color:#D4AF37;font-weight:800;letter-spacing:.13em}
 .result-head h2{color:#fff;margin:.2rem 0 0;font-size:1.8rem}
 .footer-note{text-align:center;color:rgba(255,255,255,.78);font-size:.83rem;padding-top:8px}
+
+/* ---------- Decorative aircraft ---------- */
+.aircraft-layer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:4;
+}
+.egyptian-plane{
+    position:absolute;
+    right:-145px;
+    top:355px;
+    width:min(34vw,520px);
+    max-height:290px;
+    object-fit:contain;
+    z-index:8;
+    filter:drop-shadow(0 18px 26px rgba(0,0,0,.42));
+}
+.american-plane{
+    position:absolute;
+    left:-155px;
+    top:430px;
+    width:min(31vw,470px);
+    max-height:260px;
+    object-fit:contain;
+    z-index:3;
+    opacity:.96;
+    filter:drop-shadow(0 18px 26px rgba(0,0,0,.40));
+}
+.block-container{
+    position:relative;
+    z-index:2;
+}
+div[data-testid="stForm"]{
+    position:relative;
+    z-index:6;
+}
+@media (max-width:1100px){
+    .egyptian-plane{right:-90px;top:380px;width:30vw;}
+    .american-plane{left:-95px;top:455px;width:27vw;}
+}
+@media (max-width:800px){
+    .egyptian-plane,.american-plane{display:none;}
+}
+
 </style>
 """
 dashboard_css = dashboard_css.replace("__AIRPORT_BG__", BACKGROUND_IMAGE)
@@ -131,6 +186,14 @@ st.markdown("""
   </div>
 </div>
 """, unsafe_allow_html=True)
+
+planes_html = f"""
+<div class="aircraft-layer">
+  <img class="american-plane" src="{AMERICAN_PLANE}" alt="">
+  <img class="egyptian-plane" src="{EGYPTIAN_PLANE}" alt="">
+</div>
+"""
+st.markdown(planes_html, unsafe_allow_html=True)
 
 st.markdown('<div class="section-kicker">Prediction workspace</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-title">Flight details</div>', unsafe_allow_html=True)
@@ -274,6 +337,6 @@ if submitted:
 st.divider()
 st.markdown(
     '<div class="footer-note"><b>Flight Delay Intelligence</b> · Machine Learning Project · '
-    '2015 U.S. Domestic Flights<br>Academic prediction system — not live airline operational advice , This Dashboard Created by Ahmed Shazly.</div>',
+    '2015 U.S. Domestic Flights<br>Academic prediction system — not live airline operational advice.</div>',
     unsafe_allow_html=True,
 )
