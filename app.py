@@ -1,4 +1,5 @@
 import json
+import base64
 from pathlib import Path
 
 import joblib
@@ -10,6 +11,15 @@ st.set_page_config(page_title="Flight Delay Intelligence", page_icon="✈️", l
 
 BASE = Path(__file__).resolve().parent
 ART = BASE / "artifacts"
+
+def get_background_image():
+    image_path = BASE / "airport_background.jpg"
+    if not image_path.exists():
+        return ""
+    encoded = base64.b64encode(image_path.read_bytes()).decode("utf-8")
+    return f"data:image/jpeg;base64,{encoded}"
+
+BACKGROUND_IMAGE = get_background_image()
 
 def find_file(name):
     p1 = ART / name
@@ -38,7 +48,7 @@ ORIGINS = sorted(enc["freq"]["ORIGIN_AIRPORT"].keys())
 DESTINATIONS = sorted(enc["freq"]["DESTINATION_AIRPORT"].keys())
 
 # ---------- Dashboard styling ----------
-st.markdown("""
+dashboard_css = """
 <style>
 :root{
     --gold:#D4AF37;
@@ -48,11 +58,15 @@ st.markdown("""
 }
 .stApp{
     background:
-      radial-gradient(circle at 82% 4%, rgba(212,175,55,.16), transparent 23rem),
-      linear-gradient(180deg,#ffffff 0%,#fbfaf6 52%,#ffffff 100%);
-    color:#111;
+      linear-gradient(rgba(5,8,12,.70), rgba(5,8,12,.76)),
+      url("__AIRPORT_BG__");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    background-repeat:no-repeat;
+    color:#fff;
 }
-[data-testid="stHeader"]{background:rgba(255,255,255,.82);backdrop-filter:blur(12px)}
+[data-testid="stHeader"]{background:rgba(5,8,12,.55);backdrop-filter:blur(12px)}
 .block-container{max-width:1450px;padding-top:1.35rem;padding-bottom:3rem}
 .hero{
     position:relative; overflow:hidden; min-height:330px; border-radius:28px;
@@ -69,11 +83,11 @@ st.markdown("""
 .hero h1{color:white;font-size:3.25rem;line-height:1.02;margin:0 0 14px;font-weight:850;letter-spacing:-.035em}
 .hero p{color:rgba(255,255,255,.83);font-size:1.05rem;max-width:720px;margin:0}
 .gold-line{width:72px;height:4px;background:var(--gold);border-radius:9px;margin:20px 0}
-.section-kicker{color:#9b7818;font-size:.76rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-top:1.7rem}
-.section-title{font-size:1.75rem;font-weight:850;color:#111;margin:.2rem 0 .25rem}
-.section-copy{color:#666;margin-bottom:1rem}
+.section-kicker{color:#F4D06F;font-size:.76rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-top:1.7rem}
+.section-title{font-size:1.75rem;font-weight:850;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.55);margin:.2rem 0 .25rem}
+.section-copy{color:rgba(255,255,255,.82);margin-bottom:1rem}
 div[data-testid="stForm"]{
-    background:rgba(255,255,255,.94);border:1px solid #e8e0c6;border-radius:24px;
+    background:rgba(255,255,255,.91);backdrop-filter:blur(14px);border:1px solid rgba(212,175,55,.55);border-radius:24px;
     padding:1.2rem 1.35rem 1.35rem;box-shadow:0 16px 45px rgba(0,0,0,.07)
 }
 div[data-testid="stForm"] h3{color:#111}
@@ -101,9 +115,11 @@ div[data-testid="stProgress"] > div > div > div > div{background-color:#D4AF37}
 }
 .result-head small{color:#D4AF37;font-weight:800;letter-spacing:.13em}
 .result-head h2{color:#fff;margin:.2rem 0 0;font-size:1.8rem}
-.footer-note{text-align:center;color:#777;font-size:.83rem;padding-top:8px}
+.footer-note{text-align:center;color:rgba(255,255,255,.78);font-size:.83rem;padding-top:8px}
 </style>
-""", unsafe_allow_html=True)
+"""
+dashboard_css = dashboard_css.replace("__AIRPORT_BG__", BACKGROUND_IMAGE)
+st.markdown(dashboard_css, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="hero">
