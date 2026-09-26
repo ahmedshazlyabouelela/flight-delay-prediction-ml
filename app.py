@@ -337,6 +337,7 @@ if submitted:
 st.divider()
 st.markdown(
     '<div class="footer-note"><b>Flight Delay Intelligence</b> · Machine Learning Project · '
-    '2015 U.S. Domestic Flights<br>Academic prediction system — not live airline operational advice.</div>',
+    '2015 U.S. Domestic Flights<br>Academic prediction system — not live airline operational advice. 
+    This Dashboard Created By Ahmed Shazly</div>',
     unsafe_allow_html=True,
 )
